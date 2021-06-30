@@ -1,0 +1,60 @@
+# Program OpenCV pentru detectarea feței în timp real
+# import biblioteci de python OpenCV
+# unde funcționează funcționalitatea sa 
+import cv2  
+  
+# încărcați clasificatorii XML instruiți necesari
+# https://github.com/Itseez/opencv/blob/master/
+# data / haarcascades / haarcascade_frontalface_default.xml
+# Clasificatorii XML instruiți descriu unele caracteristici ale unora
+# obiectul pe care dorim să-l detectăm o funcție cascadă este antrenat
+# dintr-o mulțime de pozitive (fețe) și negative (non-fețe)
+# imagini. 
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml') 
+  
+# https://github.com/Itseez/opencv/blob/master 
+# /data/haarcascades/haarcascade_eye.xml 
+# Trained XML file for detecting eyes 
+eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')  
+  
+# captează cadre de pe o cameră
+cap = cv2.VideoCapture(0) 
+  
+# bucla rulează dacă captura a fost inițializată.
+while 1:  
+  
+    # citește cadrele de pe o cameră
+    ret, img = cap.read()  
+  
+    # converteste la scara de gri a fiecărui cadru 
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+  
+    # Detectează fețe de diferite dimensiuni în imaginea de intrare
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5) 
+  
+    for (x,y,w,h) in faces: 
+        # To draw a rectangle in a face  
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,255,0),2)  
+        roi_gray = gray[y:y+h, x:x+w] 
+        roi_color = img[y:y+h, x:x+w] 
+  
+        # Detectează ochi de diferite dimensiuni în imaginea de intrare 
+        eyes = eye_cascade.detectMultiScale(roi_gray)  
+  
+        # Pentru a desena un dreptunghi în jurul ochilor 
+        for (ex,ey,ew,eh) in eyes: 
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,127,255),2) 
+  
+    # Afiseaza o imagine într-o fereastră 
+    cv2.imshow('img',img) 
+  
+    # Asteapta oprirea tastei Esc 
+    k = cv2.waitKey(30) & 0xff
+    if k == 27: 
+        break
+  
+# inchide fereastra
+cap.release() 
+  
+# De-aloca orice utilizare a memoriei asociate 
+cv2.destroyAllWindows()  
